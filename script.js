@@ -1,56 +1,79 @@
-/* ══════════════════════════════════════════════════
-   Romeo Brunch & Café — Landing Page Scripts
-   ══════════════════════════════════════════════════ */
+/* ==========================================
+   LOCAL BUSINESS — WARM VIBRANT TEMPLATE
+   script.js
+   ========================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Nav scroll effect ───────────────────────────
-  const nav = document.getElementById('nav');
+    /* ---------- CURRENT YEAR ---------- */
+    const yearEl = document.getElementById('currentYear');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 50);
-  });
 
-  // ── Mobile menu toggle ──────────────────────────
-  const navToggle = document.getElementById('navToggle');
-  const navLinks = document.querySelector('.nav-links');
-
-  if (navToggle && navLinks) {
-    navToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
-      navToggle.classList.toggle('active');
-    });
-  }
-
-  // ── Intersection Observer (fade-up animations) ──
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  });
-
-  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-  // ── Smooth scroll for anchor links ──────────────
-  document.querySelectorAll('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // Close mobile menu if open
-        if (navLinks && navLinks.classList.contains('active')) {
-          navLinks.classList.remove('active');
-          navToggle.classList.remove('active');
+    /* ---------- HEADER SCROLL STATE ---------- */
+    const header = document.getElementById('siteHeader');
+    const updateHeader = () => {
+        if (window.scrollY > 20) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
         }
-      }
+    };
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
+
+
+    /* ---------- MOBILE MENU ---------- */
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    if (mobileToggle && mainNav) {
+        mobileToggle.addEventListener('click', () => {
+            mobileToggle.classList.toggle('active');
+            mainNav.classList.toggle('open');
+            document.body.style.overflow = mainNav.classList.contains('open') ? 'hidden' : '';
+        });
+
+        mainNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileToggle.classList.remove('active');
+                mainNav.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+
+
+    /* ---------- SMOOTH SCROLL ---------- */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', (e) => {
+            const targetId = anchor.getAttribute('href');
+            if (targetId === '#') return;
+            const target = document.querySelector(targetId);
+            if (target) {
+                e.preventDefault();
+                const headerHeight = header ? header.offsetHeight : 72;
+                const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            }
+        });
     });
-  });
+
+
+    /* ---------- ENTRANCE ANIMATIONS ---------- */
+    const animatedEls = document.querySelectorAll('[data-animate]');
+    if (animatedEls.length > 0 && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        animatedEls.forEach(el => observer.observe(el));
+    } else {
+        animatedEls.forEach(el => el.classList.add('visible'));
+    }
 
 });
